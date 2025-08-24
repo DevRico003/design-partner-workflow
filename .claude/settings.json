@@ -1,0 +1,117 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "description": "Analyze task complexity and suggest planning approach",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/classify-task.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "description": "Ensure plan exists for complex changes before implementation",
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/check-plan-requirement.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "description": "Update plan with implementation notes after code changes",
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/update-plan.sh"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "description": "Load relevant active plans for context",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/load-context.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "description": "Show plan progress and suggest next steps",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/show-progress.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "complexity": {
+    "thresholds": {
+      "trivial": {
+        "maxFiles": 2,
+        "maxLines": 50,
+        "maxDuration": "30min",
+        "requiresPlan": false,
+        "description": "Typos, style fixes, simple translations"
+      },
+      "small": {
+        "maxFiles": 5,
+        "maxLines": 200,
+        "maxDuration": "2h",
+        "requiresPlan": "optional",
+        "description": "New buttons, simple endpoints, form fields"
+      },
+      "medium": {
+        "maxFiles": 10,
+        "maxLines": 500,
+        "maxDuration": "1d",
+        "requiresPlan": true,
+        "description": "New components, integrations, refactoring"
+      },
+      "large": {
+        "maxFiles": 20,
+        "maxLines": 1000,
+        "maxDuration": "3d",
+        "requiresPlan": true,
+        "requiresReview": true,
+        "description": "New features, architecture changes, migrations"
+      },
+      "epic": {
+        "maxFiles": null,
+        "maxLines": null,
+        "maxDuration": ">3d",
+        "requiresPlan": true,
+        "requiresBreakdown": true,
+        "description": "Platform changes, complete redesigns, new services"
+      }
+    },
+    "keywords": {
+      "trivial": ["typo", "color", "spacing", "text", "translation", "comment"],
+      "small": ["add button", "new field", "validation", "endpoint", "form"],
+      "medium": ["component", "refactor", "integration", "page", "feature"],
+      "large": ["feature", "migration", "architecture", "service", "system"],
+      "epic": ["redesign", "rewrite", "platform", "infrastructure", "complete"]
+    }
+  },
+  "permissions": {
+    "deny": [
+      ".env*",
+      "*.pem", 
+      "*.key",
+      ".claude/settings.local.json"
+    ]
+  }
+}
